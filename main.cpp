@@ -198,6 +198,23 @@ void merge_sort_optimise_wrapper(vector<int>&d){
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//Tri à bulle
+
+void bubble_sort(vector<int>&v){
+    int end = v.size();
+    while (end > 1){
+        int last_point = 0;
+        for (int j = 0; j < end-1; j++){
+            if (v[j] > v[j+1]){
+                swap(v[j],v[j+1]);
+                last_point = j+1;
+            }
+        }
+        end = last_point;
+    }
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Fonction de mesure et de benchmark de mes tri
 
 double mesure(TriFn tri, const vector<int>&D){
@@ -299,7 +316,7 @@ bool verificationTri(Tri f_tri){
         cout << "Le tri "<< f_tri.nom << " est opérationnel" << endl;
         return true;
     } else {
-        cout << "ERREUR, le tri " << f_tri.nom << "est opérationnel" << endl;
+        cout << "ERREUR, le tri " << f_tri.nom << "n'est pas opérationnel" << endl;
         return false;
     }
 }
@@ -315,8 +332,9 @@ int main(){
     Tri fusion_opt = {"Fusion_optimisé",merge_sort_optimise_wrapper};
     Tri rapide = {"Rapide",quick_sort};
     Tri rapide_opt = {"Rapide_optimisé",quick_sort_optimise};
+    Tri bulle = {"Bulle",bubble_sort};
 
-    vector<Tri> tr = {selection,insertion,fusion,fusion_opt,rapide,rapide_opt};
+    vector<Tri> tr = {selection,insertion,fusion,fusion_opt,rapide,rapide_opt,bulle};
     //Verification des tris
     for (Tri x:tr){
         verificationTri(x);
