@@ -2,30 +2,36 @@
 #include <random>
 #include <string>
 #include <vector>
-#include <deque>
+#include <vector>
 #include <algorithm>
 
 using namespace std;
 
-using TriFn = void(*)(deque<int>&);
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+using TriFn = void(*)(vector<int>&);
+/*Remplacement des deque par les vector car plus rapide et contigue*/
 
 typedef struct Tri{
     string nom;
     TriFn tri;
 }Tri;
 
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void generation_aleatoire(deque<int>&D,int n){
+
+void generation_aleatoire(vector<int>&D,int n){
     static mt19937 gen(random_device{}());
     uniform_int_distribution<> distribution(1,1000);
 
     for (int i = 0; i < n; i++){
         int alea = distribution(gen);
-        D.push_front(alea);
+        D.insert(D.begin(),alea);
     }
 }
 
-void afficher_liste(deque<int>&D){
+void afficher_liste(vector<int>&D){
     if (D.size() == 0) cout << "List is empty !" << endl;
     cout << "Size: " << D.size() << endl;
     for (int ele : D){
@@ -34,7 +40,9 @@ void afficher_liste(deque<int>&D){
     cout << "\n\n" << endl;
 }
 
-void selection_sort(deque<int>&D){
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void selection_sort(vector<int>&D){
     int size = D.size();
 
     for (int i = size - 1; i >= 0; i--){ // from end to start
@@ -48,7 +56,10 @@ void selection_sort(deque<int>&D){
     }
 }
 
-void insertion_sort(deque<int>&D){
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+void insertion_sort(vector<int>&D){
     size_t size = D.size();
     for (int i = 1; i < size; i++){
         int cle = D[i];
@@ -61,8 +72,135 @@ void insertion_sort(deque<int>&D){
     }
 }
 
-double mesure(TriFn tri, const deque<int>&D){
-    deque<int>d_test = D;
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+void quick_sort(vector<int>&d){
+    if(d.size()<=1){
+        return ;
+    }
+    int pivot = d.back();
+    d.pop_back();
+
+    vector<int>petit; // Allocation mémoire
+    vector<int>grand; // Allocation mémoire
+
+    for (int x:d){
+        if (x < pivot) petit.insert(petit.begin(),x);
+        else grand.insert(grand.begin(),x);  //O(n) à chaque insertion
+    }
+
+    quick_sort(petit);
+    quick_sort(grand);
+
+    d.clear();
+    for (int x: petit) d.push_back(x); //Copie de tout les élements
+    d.push_back(pivot);
+    for (int x : grand) d.push_back(x); //Copie de tout les élements
+}
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/*Version optimisé du quick_sort ou l'on travaille uniquement dans le même tableau original paqs de nouvelle alocation mémoire 
+à chaque appel reccursif, uniquement swap donc aucune allocation.*/
+
+void quick_sort_inplace(vector<int>&D, int debut,int fin){
+    if (debut >= fin) return;
+    int pivot = D[fin];
+    int i = debut - 1;
+    for (int j = debut; j < fin; j++){
+        if (D[j] < pivot){
+            i++;
+            swap(D[i], D[j]);
+        }
+    }
+    swap(D[i + 1], D[fin]);
+    int pi = i + 1;
+    quick_sort_inplace(D,debut,pi-1);
+    quick_sort_inplace(D,pi+1,fin);
+}
+
+void quick_sort_optimise(vector<int>&d){
+    if (d.size() <= 1) return;
+    quick_sort_inplace(d,0,d.size()-1);
+}
+
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void fusionner(vector<int>& d, int debut, int milieu, int fin){
+    vector<int> temp;
+    int i = debut;
+    int j = milieu;
+    while (i < milieu && j < fin){
+        if (d[i] < d[j]){
+            temp.push_back(d[i]);
+            i++;
+        }
+        else{
+            temp.push_back(d[j]);
+            j++;
+        }
+    }
+    while (i < milieu){
+        temp.push_back(d[i]);
+        i++;
+    }
+    while (j < fin){
+        temp.push_back(d[j]);
+        j++;
+    }
+    for (int k = 0; k < temp.size(); k++){
+        d[debut + k] = temp[k];
+    }
+}
+
+void merge_sort(vector<int>&D,int debut,int fin){
+    if((fin - debut) <= 1) return;
+    int milieu = (debut+fin)/2;
+    merge_sort(D,debut,milieu);
+    merge_sort(D,milieu,fin);
+    fusionner(D,debut,milieu,fin);
+}
+
+/*On a besoin d'un wrapper pour l'appel ensuite danxs la fonction comparaison sort,pour son pointeur de fonction*/
+void merge_sort_wrapper(vector<int>&D){
+    if(D.empty()) return;
+    merge_sort(D,0,D.size());
+}
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void fusion_opti(vector<int>& d, vector<int>& tmp,int debut,int milieu,int fin){
+    for (int k = debut; k < fin; k++){
+        tmp[k] = d[k];
+    }
+    int i = debut, j = milieu;
+    for (int k = debut; k < fin; k++){
+        if (i >= milieu) d[k] = tmp[j++];
+        else if (j >= fin) d[k] = tmp[i++];
+        else if (tmp[i] <= tmp[j]) d[k] = tmp[i++];
+        else d[k] = tmp[j++];
+    }
+}
+
+void merge_sort_optimise(vector<int>& d,vector<int>& tmp,int debut,int fin){
+    if((fin - debut) <= 1) return;
+    int milieu = (debut + fin) / 2;
+    merge_sort_optimise(d,tmp,debut,milieu);
+    merge_sort_optimise(d,tmp,milieu,fin);
+    fusion_opti(d,tmp,debut,milieu,fin);
+}
+
+void merge_sort_optimise_wrapper(vector<int>&d){
+    if(d.empty()) return;
+    vector<int> temp(d.size());
+    merge_sort_optimise(d,temp,0,d.size());
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//Fonction de mesure et de benchmark de mes tri
+
+double mesure(TriFn tri, const vector<int>&D){
+    vector<int>d_test = D;
     auto debut = chrono::steady_clock::now();
     tri(d_test);
     auto fin = chrono::steady_clock::now();
@@ -70,10 +208,25 @@ double mesure(TriFn tri, const deque<int>&D){
     return duree.count();
 }
 
+void mesure_affine(Tri func_tr,vector<int>&d){
+    vector<int>temps_t(d);
+    auto debut = chrono::steady_clock::now();
+    func_tr.tri(temps_t);
+    auto fin = chrono::steady_clock::now();
+    auto duree = std::chrono::duration_cast<std::chrono::microseconds>(fin - debut);
+    cout << "Le temps de Tri de " << func_tr.nom << " est " << duree.count() << endl;
+}
+
+void mesure_totale(vector<Tri>& trr,vector <int>&d){
+    for(Tri x:trr){
+        mesure_affine(x,d);
+    }
+}
+
 void comparaison_sort(Tri t1,Tri t2){
-    deque<int>ndc;
+    vector<int>ndc;
     generation_aleatoire(ndc,100);
-    deque<int>ndc2 = ndc;
+    vector<int>ndc2 = ndc;
     auto tp1 = mesure(t1.tri,ndc);
     auto tp2 = mesure(t2.tri,ndc2);
     if (tp1 < tp2){
@@ -91,7 +244,7 @@ double mean_complexity(TriFn tri,size_t precision,bool affichage_ele){
     vector<long long> result_tab;
     result_tab.reserve(precision);
     for (int i = 0; i < precision; i++){
-        deque<int>dl;
+        vector<int>dl;
         generation_aleatoire(dl,100);
         result_tab.push_back(mesure(tri,dl));
     }
@@ -111,13 +264,13 @@ double mean_complexity(TriFn tri,size_t precision,bool affichage_ele){
 }
 
 bool verificationTri(Tri f_tri){
-    deque<int>d1;
+    vector<int>d1;
     generation_aleatoire(d1,100);
-    deque<int>d2 = d1;
+    vector<int>d2 = d1;
     f_tri.tri(d1);
     sort(d2.begin(),d2.end());
     if (d1 == d2){
-        cout << "Le tri est opérationnel" << endl;
+        cout << "Le tri "<< f_tri.nom << " est opérationnel" << endl;
         return true;
     } else {
         cout << "ERREUR, le tri " << f_tri.nom << "est opérationnel" << endl;
@@ -125,15 +278,40 @@ bool verificationTri(Tri f_tri){
     }
 }
 
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 int main(){
+    // Structure de mes tri
+    Tri selection = {"Selection",selection_sort};
+    Tri insertion = {"Insertion",insertion_sort};
+    Tri fusion = {"Fusion",merge_sort_wrapper};
+    Tri fusion_opt = {"Fusion_optimisé",merge_sort_optimise_wrapper};
+    Tri rapide = {"Rapide",quick_sort};
+    Tri rapide_opt = {"Rapide_optimisé",quick_sort_optimise};
 
+    vector<Tri> tr = {selection,insertion,fusion,fusion_opt,rapide,rapide_opt};
+    //Verification des tris
+    for (Tri x:tr){
+        verificationTri(x);
+    }
+
+    //Test performance des tri
+    vector<TriFn> tri_function = {selection_sort,insertion_sort,merge_sort_wrapper,merge_sort_optimise_wrapper,quick_sort,quick_sort_optimise};
+    vector<int> liste;
+    generation_aleatoire(liste,10000);
+    mesure_totale(tr,liste);
+    
+
+    /*
     //Initialisation de la liste aléatoire
-    deque<int> dli;
+    vector<int> dli;
     generation_aleatoire(dli,100);
     afficher_liste(dli);
-    deque<int>dlc(dli);
+    vector<int>dlc(dli);
     afficher_liste(dlc);
+    vector<int>dlc2(dlc);
+    vector<int>dlc3(dlc);
 
     //implémentation des différent algo de tri par la suite !!!
     afficher_liste(dlc);
@@ -142,6 +320,7 @@ int main(){
 
     Tri selection = {"Selection",selection_sort};
     Tri insertion = {"Insertion",insertion_sort};
+    Tri rapide = {"Rapide",quick_sort};
 
 
     double tmp = mesure(selection_sort,dli);
@@ -156,9 +335,22 @@ int main(){
     cout << "Moyenne de temps de tri :" << mean_tmp2 << endl;
     printf("\n");
 
+    double tmp3 = mesure(quick_sort_optimise,dlc2);
+    cout << "Temps de tri :" << tmp3 << endl;
+    /*Aprés verification du temps de tri de quick_sort, le tri qui est sensé être le plus rapide est relativement lent et cela est du 
+    au faîte qu'on crée deux vector(container) ce qui augemente considérablement le temps de tri*/
+    /*Nous allons refaire une fonction de tri rapide beaucoup plus optimiser*/
+    /*double tmp4 = mesure(merge_sort_optimise_wrapper,dlc3);
+    cout << "Temps de tri :" << tmp4 << endl;
+
+
     comparaison_sort(selection,insertion);
     verificationTri(selection);
-    verificationTri(insertion);
+    verificationTri(insertion);*/
+    
+
+    //Finir le merge sort comparaison entre les different sort et explication
+    
 
 
 
