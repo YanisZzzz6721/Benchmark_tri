@@ -2,7 +2,6 @@
 #include <random>
 #include <string>
 #include <vector>
-#include <vector>
 #include <algorithm>
 #include <fstream>
 
@@ -290,8 +289,10 @@ void complexity_evolution(Tri tri_funct,int mean_pres){
     }
 }
 
-void export_csv(Tri tri_funct,int mean_pres){
-    ofstream fichier("resultat.csv");
+//Mean_press -> Précision des test pour mean_pres = 10, on va effectuer 10 teste d'affilé pour le même nombre d'élément on ferra ensuite une moyenne de cest mean_pres resultat pour avoir une complexité moyennne
+
+void export_csv(Tri tri_funct,int mean_pres,string fichier_n){
+    ofstream fichier(fichier_n);
     if(fichier.is_open()){
         fichier <<  tri_funct.nom << "," << "Précision:"<< mean_pres <<"\n";
         fichier << "Taille,Temps" << "\n";
@@ -303,6 +304,31 @@ void export_csv(Tri tri_funct,int mean_pres){
         fichier.close();
     }
     cout << "Importation SUCCESFUL" << endl;
+}
+
+void export_final_csv(vector<Tri> tr_tl,int mean_pres){
+    ofstream fichier("result_final.csv");
+    vector<int>tailles = {100,500,1000,2500,5000,7500,10000};
+
+    if(fichier.is_open()){
+        fichier << "Precision: "<< mean_pres << "\n";
+        fichier << "Taille";
+        for(const Tri& t:tr_tl){
+            fichier << "," << t.nom;
+        }
+        fichier << endl;
+        for (int taille:tailles){
+            fichier << taille;
+            for (const Tri& t : tr_tl){
+                double moyenne = mean_complexity(t,taille,mean_pres,false);
+                fichier << "," << moyenne;
+            }
+            fichier << "\n";
+            cout << "Taille " << taille << " terminée" << endl;
+        }
+        fichier.close();
+        cout << "Export terminé" << endl;
+    }
 }
 
 
@@ -351,58 +377,8 @@ int main(){
     vector<int>v1;
     complexity_evolution(rapide_opt,10);
 
-    export_csv(insertion,10);
-    
-
-    /*
-    //Initialisation de la liste aléatoire
-    vector<int> dli;
-    generation_aleatoire(dli,100);
-    afficher_liste(dli);
-    vector<int>dlc(dli);
-    afficher_liste(dlc);
-    vector<int>dlc2(dlc);
-    vector<int>dlc3(dlc);
-
-    //implémentation des différent algo de tri par la suite !!!
-    afficher_liste(dlc);
-    afficher_liste(dli);
-
-
-    Tri selection = {"Selection",selection_sort};
-    Tri insertion = {"Insertion",insertion_sort};
-    Tri rapide = {"Rapide",quick_sort};
-
-
-    double tmp = mesure(selection_sort,dli);
-    cout << "Temps de tri :" << tmp << endl;
-    double mean_tmp = mean_complexity(selection_sort,50,false);
-    cout << "Moyenne de temps de tri :" << mean_tmp << endl;
-    printf("\n");
-
-    double tmp2 = mesure(insertion_sort,dlc);
-    cout << "Temps de tri :" << tmp2 << endl;
-    double mean_tmp2 = mean_complexity(insertion_sort,50,false);
-    cout << "Moyenne de temps de tri :" << mean_tmp2 << endl;
-    printf("\n");
-
-    double tmp3 = mesure(quick_sort_optimise,dlc2);
-    cout << "Temps de tri :" << tmp3 << endl;
-    /*Aprés verification du temps de tri de quick_sort, le tri qui est sensé être le plus rapide est relativement lent et cela est du 
-    au faîte qu'on crée deux vector(container) ce qui augemente considérablement le temps de tri*/
-    /*Nous allons refaire une fonction de tri rapide beaucoup plus optimiser*/
-    /*double tmp4 = mesure(merge_sort_optimise_wrapper,dlc3);
-    cout << "Temps de tri :" << tmp4 << endl;
-
-
-    comparaison_sort(selection,insertion);
-    verificationTri(selection);
-    verificationTri(insertion);*/
-    
-
-    //Finir le merge sort comparaison entre les different sort et explication
-    
-
+    export_csv(insertion,10,"resultat.csv");
+    export_final_csv(tr,10);
 
 
 
