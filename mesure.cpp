@@ -9,7 +9,6 @@
 
 using namespace std;
 
-
 void generation_aleatoire(vector<int>&D,int n){
     static mt19937 gen(random_device{}());
     uniform_int_distribution<> distribution(1,1000);
@@ -48,7 +47,7 @@ double mesure_affine(Tri func_tr,vector<int>&d){
     func_tr.tri(temps_t);
     auto fin = chrono::steady_clock::now();
     auto duree = std::chrono::duration_cast<std::chrono::microseconds>(fin - debut);
-    cout << "Le temps de Tri de " << func_tr.nom << " est " << duree.count() << endl;
+    cout << "Le temps de Tri de " << func_tr.nom << " est " << duree.count() << "µs" << endl;
     return duree.count();
 }
 
@@ -102,7 +101,7 @@ void complexity_evolution(Tri tri_funct,int mean_pres){
 
     for (int taille:tailles){
         double moyenne = mean_complexity(tri_funct,taille,mean_pres,false);
-        cout << "Pour " << taille << " éléments" << " on compte " << moyenne  << " en moyenne "<< endl;
+        cout << "Pour " << taille << " éléments" << " on compte " << moyenne  << "µs en moyenne "<< endl;
     }
 }
 
@@ -126,7 +125,7 @@ void export_csv(Tri tri_funct,int mean_pres,string fichier_n){
 void export_final_csv(vector<Tri> tr_tl,int mean_pres){
     ofstream fichier("result_final.csv");
     vector<int>tailles = {100,500,1000,2500,5000,7500,10000};
-
+    vider_csv();
     if(fichier.is_open()){
         fichier << "Precision: "<< mean_pres << "\n";
         fichier << "Taille";
@@ -162,4 +161,9 @@ bool verificationTri(Tri f_tri){
         cout << "ERREUR, le tri " << f_tri.nom << "n'est pas opérationnel" << endl;
         return false;
     }
+}
+
+void vider_csv(){
+    ofstream fichier("result_final.csv",ios::trunc);
+    fichier.close();
 }

@@ -10,6 +10,7 @@
 using namespace std;
 
 int main(){
+    
     // Structure de mes tri
     Tri selection = {"Selection",selection_sort};
     Tri insertion = {"Insertion",insertion_sort};
@@ -38,6 +39,7 @@ int main(){
 
     export_csv(insertion,10,"resultat.csv");
     export_final_csv(tr,10);
+
 
 
 

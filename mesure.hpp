@@ -28,4 +28,6 @@ void export_final_csv(vector<Tri> tr_tl,int mean_pres);
 
 bool verificationTri(Tri f_tri);
 
+void vider_csv();
+
 #endif
