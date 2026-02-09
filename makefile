@@ -3,8 +3,8 @@ CXXFLAGS = -std=c++17 -Wall
 
 all: main
 
-main: main.cpp
-	$(CXX) $(CXXFLAGS) -o main main.cpp
+main: main.cpp sorters.cpp mesure.cpp
+	$(CXX) $(CXXFLAGS) -o main main.cpp sorters.cpp mesure.cpp
 
 run: main
 	./main
